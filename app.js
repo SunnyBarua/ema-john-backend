@@ -41,11 +41,19 @@ app.get("/", (req, res) => {
 });
 
 app.get("/product/:id", (req, res) => {
-  const id = req.params.id;
-  const name = users[id];
-  res.send({ id, name });
+  client = new MongoClient(uri, { useNewUrlParser: true });
+  client.connect((err) => {
+    const collection = client.db("onlineStore").collection("products");
+    collection.find({ key: req.params.id }).toArray((err, documents) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(documents[0]);
+      }
+      client.close();
+    });
+  });
 });
-
 app.post("/addProduct", (req, res) => {
   client = new MongoClient(uri, {
     useNewUrlParser: true,
