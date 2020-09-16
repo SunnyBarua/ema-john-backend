@@ -10,6 +10,7 @@ app.use(bodyParser.json());
 
 const PORT = process.env.PORT;
 const uri = process.env.DB_PATH;
+
 let client = new MongoClient(uri, {
   useNewUrlParser: true,
 });
@@ -21,7 +22,7 @@ app.get("/", (req, res) => {
   client.connect((err) => {
     const collection = client.db("onlineStore").collection("products");
     collection
-      .find({ name: "Iphone" })
+      .find()
       .limit(10)
       .toArray((err, documents) => {
         console.log("successfully inserted", documents);
@@ -39,6 +40,12 @@ app.get("/", (req, res) => {
   });
 });
 
+app.get("/product/:id", (req, res) => {
+  const id = req.params.id;
+  const name = users[id];
+  res.send({ id, name });
+});
+
 app.post("/addProduct", (req, res) => {
   client = new MongoClient(uri, {
     useNewUrlParser: true,
@@ -46,7 +53,7 @@ app.post("/addProduct", (req, res) => {
   const product = req.body;
   client.connect((err) => {
     const collection = client.db("onlineStore").collection("products");
-    collection.insertOne(product, (err, result) => {
+    collection.insert(product, (err, result) => {
       console.log("successfully inserted", result);
       if (err) {
         console.log(err);
@@ -58,6 +65,24 @@ app.post("/addProduct", (req, res) => {
     });
 
     console.log("Database connected ...");
+    client.close();
+  });
+});
+
+app.post("/placeOrder", (req, res) => {
+  const orderDetails = req.body;
+  orderDetails.orderTime = new Date();
+  client = new MongoClient(uri, { useNewUrlParser: true });
+  client.connect((err) => {
+    const collection = client.db("onlineStore").collection("orders");
+    collection.insertOne(orderDetails, (err, result) => {
+      if (err) {
+        console.log(err);
+        res.status(500).send({ message: err });
+      } else {
+        res.send(result.ops[0]);
+      }
+    });
     client.close();
   });
 });
