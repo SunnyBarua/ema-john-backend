@@ -1,0 +1,22 @@
+body {
+  background-color: tan;
+}
+.container {
+  margin: 20px auto;
+  position: absolute;
+  left: 40%;
+}
+.row {
+  display: flex;
+  flex-direction: column;
+}
+.row input {
+  height: 40px;
+  width: 300px;
+  margin-bottom: 10px;
+}
+.row button {
+  height: 40px;
+  width: 307px;
+  padding: 10px;
+}
