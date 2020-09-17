@@ -40,13 +40,15 @@ app.get("/", (req, res) => {
   });
 });
 
-app.get("/product/:id", (req, res) => {
+app.get("/product/:key", (req, res) => {
+  const key = req.params.key;
   client = new MongoClient(uri, { useNewUrlParser: true });
   client.connect((err) => {
     const collection = client.db("onlineStore").collection("products");
-    collection.find({ key: req.params.id }).toArray((err, documents) => {
+    collection.find({ key }).toArray((err, documents) => {
       if (err) {
         console.log(err);
+        res.status(500).send({ message: err });
       } else {
         res.send(documents[0]);
       }
@@ -54,6 +56,25 @@ app.get("/product/:id", (req, res) => {
     });
   });
 });
+
+app.post("/getProductsByKey", (req, res) => {
+  const key = req.params.key;
+  const productKeys = req.body;
+  client = new MongoClient(uri, { useNewUrlParser: true });
+  client.connect((err) => {
+    const collection = client.db("onlineStore").collection("products");
+    collection.find({ key: { $in: productKeys } }).toArray((err, documents) => {
+      if (err) {
+        console.log(err);
+        res.status(500).send({ message: err });
+      } else {
+        res.send(documents);
+      }
+      client.close();
+    });
+  });
+});
+
 app.post("/addProduct", (req, res) => {
   client = new MongoClient(uri, {
     useNewUrlParser: true,
